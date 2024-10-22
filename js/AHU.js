@@ -35,35 +35,446 @@ var urlUidesk='https://pelni.uidesk.id/crm/apps/WebServiceGetDataMaster.asmx/UID
 
 function myFunction() {
  
-//   myVarX = setInterval(fetchData, 1000);
-//   myVarY = setInterval(agentList, 1000);
+  // myVarX = setInterval(fetchData, 80000);
+   myVarY = setInterval(agentList, 8000);
+
   //calloutbound staffedoutbound auxagent waiting acdin avail callabdn callanswer
 
   //------------------------
   getDateTime();
 
-  SLA();
-  GetSShData();
-  fetchDataAgent();
-  fetchDataTotalEmail();
-  fetchDataKelola();
+   SLA();
+   GetSShData();
+   fetchDataAgent();
+   fetchDataTotalEmail();
+   fetchDataKelola();
+   fetchDataTotalAux();
+   
+   
+ 
 
   //------------------------
 
   
 }
-function SLA(){
+
+function fetchDataTotalAux(){
+var aarayagent=[];
+  
+  //var selectedValue = value;
+    $.ajax({
+        type: "POST",
+        url: "https://pelni.uidesk.id/crm/apps/WebServiceGetDataMaster.asmx/UIDESK_TrmMasterCombo",
+        data: "{TrxID:'', TrxUserName: '', TrxAction: 'AuxData'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+
+          var json = JSON.parse(data.d);
+          dataAgent=json;
+          var i, x, resultSourceEnquiryReason = "";
+          console.log(json);
+          
+          var table = '<table class="table table-light table-striped">';
+          // Membuat baris header
+          table += '<tr>' +                                               
+         '<th scope="col">Nama Agent</th>'+
+                                            '<th scope="col">Status</th>'+
+                                             '<th scope="col">Login Time</th>'+
+                                            '<th scope="col">Prayer</th>'+
+                                            '<th scope="col">Lunch</th>'+
+                                            '<th scope="col">Short Break</th>'+
+                                            '<th scope="col">Meeting</th>'+
+                                            '<th scope="col">Training</th>'+
+                                            '<th scope="col">Friday Pray</th>'+
+                                            '<th scope="col">Toilet</th>'+
+											'<th scope="col">FollowUp</th>'+
+											'<th scope="col">Ready</th>'+
+         
+          '</tr>';
+          // Loop melalui setiap objek dalam respons dan menambahkan baris untuk setiap objek
+          
+
+          for (i = 0; i < json.length; i++) {
+            aarayagent.push(json[i].AuxUserName);
+
+           
+              table += '<tr>';
+              table += '<td>' + json[i].AuxUserName + '</td>';
+              table += '<td>Aux</td>';
+              // table += '<td>' + json[i].HandleMarket + '</td>';
+              table += '<td> 00:00:00 </td>';
+              table += '<td>' + json[i].Prayer + '</td>';
+              table += '<td>' + json[i].Lunch + '</td>';
+              table += '<td>' + json[i].ShortBreak + '</td>';
+              table += '<td>' + json[i].Meeting + '</td>';
+              table += '<td>' + json[i].Training + '</td>';
+			  table += '<td>' + json[i].FridayPray + '</td>';
+			    table += '<td>' + json[i].Toilet + '</td>';
+				 table += '<td>' + json[i].FollowUp + '</td>';
+				  table += '<td>' + json[i].Ready + '</td>';
+              table += '</tr>';
+			  
+			  
+          
+          
+          // Menutup tabel HTML
+         
+        }
+        table += '</table>';
+          
+        $('#table-container').html(table);
+
+
+        },
+        error: function (xmlHttpRequest, textStatus, errorThrown) {
+            console.log(xmlHttpRequest.responseText);
+            console.log(textStatus);
+            console.log(errorThrown);
+        },
+        complete: function(xhr, status) {
+          
+       listAgentCall(aarayagent);
+        }
+        
+    })
+}
+
+
+function searchArray(searchString, array) {
+ 
+
+  var lowerCaseSearchString = searchString.toLowerCase();
+
+  // Use filter to find matching items
+  var results = array.filter(function(item) {
+      return item.toLowerCase().includes(lowerCaseSearchString);
+  });
+
+  // Return the results
+  return results;
+}
+function GetdataChart(){
+	 $('#chart').empty();
+       var options = {
+        series: [],
+        chart: {
+          type: 'bar',
+          height: 430
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            dataLabels: {
+              position: 'top',
+            },
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          offsetX: -6,
+          style: {
+            fontSize: '12px',
+            colors: ['#fff']
+          }
+        },
+        stroke: {
+          show: true,
+          width: 1,
+          colors: ['#fff']
+        },
+        tooltip: {
+          shared: true,
+          intersect: false
+        },
+        xaxis: {
+          categories: [],
+        },
+      };
+	  
+	let categories = [];  
+	var urlUidesk='https://pelni.uidesk.id/crm/apps/WebServiceGetDataMaster.asmx/UIDESK_TrmMasterCombo';
+		$.ajax({
+      type: "POST",
+      url: urlUidesk,
+     data: "{TrxID:'', TrxUserName: '"+$('#calltotal').html()+"', TrxAction: 'UIDESK204'}",
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      success: function (data) {
+
+          var json = JSON.parse(data.d);
+		  
+		  
+		json.forEach(function(item) {
+    
+			if (!Array.isArray(item.data)) {
+				// Convert the data property to an array
+
+				item.data = [item.data];
+			}
+			categories.push(item.name);
+		});
+		  
+			
+		  var options = {
+          series: json,
+          chart: {
+          type: 'bar',
+          height: 430
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            dataLabels: {
+              position: 'top',
+            },
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          offsetX: -6,
+          style: {
+            fontSize: '12px',
+            colors: ['#fff']
+          }
+        },
+        stroke: {
+          show: true,
+          width: 1,
+          colors: ['#fff']
+        },
+        tooltip: {
+          shared: true,
+          intersect: false
+        },
+        xaxis: {
+          categories: ['Total Data'],
+        },
+		colors: ['#64b8ed', '#FFd700', '#C13584','#25D366']
+        };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+          
+             
+
+        }
+      
+
+      
+      
+	 })
+	
+	
+}
+
+
+
+
+			  
+function listAgentCall(Agent){
+ 
+
+  if (Agent.length == 0){
+      listCallZero();
+  }else{
+    listCallNotZero(Agent);
+
+  }
+
+
+	
+
+}
+
+async function listCallNotZero(Agent) {
+  let body = ""; // Store HTML content
+
+  try {
+    // Fetch agent and peer data concurrently
+    const [agentData, peerDataResponse] = await Promise.all([
+      $.getJSON("BE/getssh_listagent_que.php"),
+      $.getJSON("BE/getDataPeers.php"),
+    ]);
+
+    const peers = peerDataResponse.sip_peers; // Extract peers from response
+    console.log(agentData, peers);
+
+    // Iterate over peers and match with agent data
+   for (const [key, peer] of Object.entries(peers)) {
+    const ext = key.split("/")[0]; // Extract extension from peer key
+    const matchingAgent = agentData.find(agent => agent.local == ext);
+
+    if (matchingAgent) {
+        $('#table-container tr').each(function() {
+            const firstColumnData = $(this).find('td').eq(0).text();
+
+            if (matchingAgent.statuscall === "Ready") {
+                const matchedAgent = agentData.find(agent =>
+                    agent.name.toLowerCase().includes(firstColumnData.toLowerCase())
+                );
+
+			//if (matchedAgent && matchedAgent.statuscall.toLowerCase() === "ready" || }) {
+                    $(this).find('td').eq(1).text(matchingAgent.statuscall);
+                    $(this).find('td').eq(2).text(secondsToTime(matchingAgent.callstaken));
+                }
+            //}
+        });
+    }
+}
+
+    // Wrap the rows in <tbody> and update the HTML content
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+}
+
+function listCallZero(){
+  var jqxhr = $.getJSON("BE/getssh_listagent_que.php", function (data) {
+  
+    $.getJSON("BE/getssh_listagent_que.php", function(data) {
+      // Keep track of unique names
+      const processedNames = new Set();
+      let NoUrutanAvail = 1; // Initialize with your starting value
+      
+      
+      var table = '<table class="table table-dark table-striped">';
+      // Membuat baris header
+      table += '<tr>' +                                               
+      
+	   '<th scope="col">Nama Agent</th>'+
+                                            '<th scope="col">Status</th>'+
+                                             '<th scope="col">Login Time</th>'+
+                                            '<th scope="col">Prayer</th>'+
+                                            '<th scope="col">Lunch</th>'+
+                                            '<th scope="col">Short Break</th>'+
+                                            '<th scope="col">Meeting</th>'+
+                                            '<th scope="col">Training</th>'+
+                                            '<th scope="col">Friday Pray</th>'+
+                                            '<th scope="col">Toilet</th>'+
+											'<th scope="col">FollowUp</th>'+
+											'<th scope="col">Ready</th>'+
+     
+      '</tr>';
+     
+     
+      $.each(data, function(i, items) {
+          console.log(items.name);
+          console.log(items.lastcalltime);
+       
+        
+          if (items.statuscall === "Ready" || items.statuscall === "Ringing" || items.statuscall.toLowerCase() === "incall" ) {
+  
+          
+         
+            table += '<tr>';
+            table += '<td>' + items.name + '</td>';
+            table += '<td>  '+ items.statuscall + ' </td>';
+            table += '<td> '+ secondsToTime(items.callstaken) + ' </td>';
+            table += '<td> 00:00:00 </td>';
+            table += '<td> 00:00:00 </td>';
+            table += '<td> 00:00:00 </td>';
+            table += '<td> 00:00:00 </td>';
+            table += '<td> 00:00:00 </td>';  
+            table += '<td> 00:00:00 </td>';  
+            table += '<td> 00:00:00 </td>';  
+            table += '<td> 00:00:00 </td>';  
+            table += '<td> 00:00:00 </td>';  
+               
+            table += '</tr>';
+  
+            table += '</table>';
+        // Append the new row to the table body
+            $('#table-container tbody').html(table);
+         
+             
+        }
+      
+       
+        //$('#table-container tr').find('td').eq(2).text('Updated Name');
+       
+      });
+     // $('#table-container tr').eq(2).find('td').eq(4).text('Updated Name');
+  
+      
+      });
+  
+        
+      
+    
+  
+    })
+    .done(function () {
+     
+           
+      
+    })
+    .fail(function () {
+      //console.log( "error" );
+    })
+    .always(function () {
+      
+      //console.log( "complete" );
+    });
+}
+function secondsToTime(seconds) {
+  var hours = Math.floor(seconds / 3600);
+  var minutes = Math.floor((seconds % 3600) / 60);
+  var secs = seconds % 60;
+
+  // Format dengan leading zero jika diperlukan
+  hours = (hours < 10) ? '0' + hours : hours;
+  minutes = (minutes < 10) ? '0' + minutes : minutes;
+  secs = (secs < 10) ? '0' + secs : secs;
+
+  return hours + ':' + minutes + ':' + secs;
+}
+function secondsToHHMMSS(totalSeconds) {
+  var hours   = Math.floor(totalSeconds / 3600);
+  var minutes = Math.floor((totalSeconds % 3600) / 60);
+  var seconds = totalSeconds % 60;
+
+  // Add leading zeros if needed
+  hours   = hours.toString().padStart(2, '0');
+  minutes = minutes.toString().padStart(2, '0');
+  seconds = seconds.toString().padStart(2, '0');
+
+  return hours + ':' + minutes + ':' + seconds;
+}
+
+
+
+async function SLA(){
   var currentDate = new Date();
   var day = currentDate.getDate();
-    var jqxhr = $.getJSON("BE/getsummary_v2.php", function (data) {
+
+  
+    var jqxhr = await $.getJSON("BE/getsummary_v2.php", function (data) {
         $.each(data["DataDetail"], function (i, items) {
                   
             
-            $('#callAht').html(items['Average Handling Time (AHT)'][day]);
-            $('#calltotal').html(items['Total Call'][day]);
+           
+            //$('#calltotal').html(items['Total Call'][day]);
             $('#callanswer').html(items['Call Answered'][day]);
-            $('#callabdn').html(items['Abnd. Queue'][day]);
-            $('#valueVoip').html(items['Service Level'][day]+' %');
+			if (items['Abnd. Ringing'] == undefined)
+				$('#callabdn').html('0');
+			else
+			 $('#callabdn').html(parseInt(items['Abnd. Ringing'][day])+  parseInt(items['ivr terminated'][day])  );
+			  if($('#callabdn').html() == 0)
+				  
+			 // items['Total Call'][day]
+				$('#calltotal').html(parseInt(items['Total Call'][day]));
+			  else
+				$('#calltotal').html(parseInt(items['Total Call'][day]));
+           if ( items['Service Level'][day] == undefined)
+			   $('#valueVoip').html(0);
+		   else
+			   
+		   var voip=  parseFloat(items['Call Answered'][day])/parseFloat($('#calltotal').html())*100
+            $('#valueVoip').html(voip.toFixed(2)+' %');
+			 var ahtCall = (parseFloat(items['Call Answered'][day]) / parseInt(items['Total Call'][day])) * 100
+
+			 $('#callAht').html(voip.toFixed(2) +'%');
            
            
         });
@@ -100,30 +511,17 @@ function fetchDataAgent(){
                 $("#emailagent").html(json[i].Jumlah);
                 
                   break;
-              case 'Call':
-                $("#callagent").html(json[i].Jumlah);
-                  break;
               case 'Wa':
                   $("#waagent").html(json[i].Jumlah);
                   break;
-                case 'Fb':
-                  $("#fbagent").html(json[i].Jumlah);
-                  break;
+                
                 case 'Ig':
                   $("#igagent").html(json[i].Jumlah);
                   break;
-                case 'Lc':
-                  $("#lcagent").html(json[i].Jumlah);
-                  break;
-                case 'Lc':
-                  $("#lcagent").html(json[i].Jumlah);
-                  break;
+                
                default:
-                $("#callagent").html(0);
                 $("#emailagent").html(0);
-                $("#fbagent").html(0);
                 $("#igagent").html(0);
-                $("#lcagent").html(0);
                 $("#waagent").html(0);
             }
            
@@ -142,7 +540,7 @@ function fetchDataAgent(){
  
 }
 function GetSShData(){
-  var jqxhr = $.getJSON("BE/getssh.php", function (data) {
+  var jqxhr = $.getJSON("BE/getSla.php", function (data) {
     
 
     var availCount = 0;
@@ -151,22 +549,62 @@ function GetSShData(){
     
     $.each(data["DataDetail"], function (i, items) {
        
-        if (items.state  === "OK") {
-          availCount++;
-        }
-        if (items.state  === "AUX") {
-          auxCount++;
-        }
-        if (items.state  === "ACD") {
+	   
+	   var storedDataAUX = localStorage.getItem('DATAAUX');
+    $('#callagent').html(items.READY);
+    // $('#calltotal').html(items.Total);
+    // $('#callanswer').html(items.ACDIN);
+    // $('#callQue').html(items.QUE);
+    // $('#callabdn').html(items.ABANDON);
+    // $('#valueVoip').html(items.SERVICE_LEVEL +" %");
+	
+	var Timeinsecond =timeToSeconds(items.TALKING);
+	// var aht=0;
+	// // if (items.Total !=  0){
+		// // aht = (Timeinsecond/items.Total)* 100;
+		// // var _aht = aht.toFixed(2);
+	// // var __aht=secondsToHHMMSS(_aht);
+	// //alert();
+	// //$('#callAht').html(__aht.split('.')[0]);
+
+	// }else{
+		// //$('#callAht').html(0);
+	// }
+	
+		var currentDateTime = new Date();
+            var hours = currentDateTime.getHours();
+            var minutes = currentDateTime.getMinutes();
+            var seconds = currentDateTime.getSeconds();
+
+            // Add leading zeros to minutes and seconds
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
          
-            acdIN++;
-         
-        }
+		   if (hours == '23' && minutes == '59'){
+			   
+			   var urlUidesk='https://pelni.uidesk.id/crm/apps/WebServiceGetDataMaster.asmx/UIDESK_TrmMasterCombo';
+							$.ajax({
+						  type: "POST",
+						  url: urlUidesk,
+						 data: "{TrxID:'"+$('#valueVoip').html()+"', TrxUserName: '"+$('#callAht').html()+"', TrxAction: 'GETSLA'}",
+						  contentType: "application/json; charset=utf-8",
+						  dataType: "json",
+						  success: function (data) {
+								var json = JSON.parse(data.d);
+							  
+							}
+      
+			})
+			   
+		   }
+			   console.log("test" + hours + ':' + minutes);
+		   
+		  
+         //   var currentTime = hours + ":" + minutes + ":" + seconds;
+	
+        
     });
-    var storedDataAUX = localStorage.getItem('DATAAUX');
-    $('#avail').html(availCount);
-    $('#staffed').html(parseInt(storedDataAUX)+parseInt(availCount));
-    $('#auxagent').html(storedDataAUX);
+    
    
   })
     .done(function () {
@@ -189,7 +627,29 @@ function GetSShData(){
 
   
 }
+function convertTimeString(timeString) {
+    // Split the time string by the period to remove milliseconds
+    return timeString.split('.')[0];
+}
+function timeToSeconds(time) {
+    // Split the time string into components
+    const parts = time.split(':');
+    let seconds = 0;
 
+    // Depending on the number of parts, calculate total seconds
+    if (parts.length === 3) { // HH:MM:SS
+        seconds += parseInt(parts[0]) * 3600; // Hours to seconds
+        seconds += parseInt(parts[1]) * 60;   // Minutes to seconds
+        seconds += parseInt(parts[2]);        // Add remaining seconds
+    } else if (parts.length === 2) { // MM:SS
+        seconds += parseInt(parts[0]) * 60;   // Minutes to seconds
+        seconds += parseInt(parts[1]);        // Add remaining seconds
+    } else if (parts.length === 1) { // Just seconds
+        seconds += parseInt(parts[0]);        // Add remaining seconds
+    }
+
+    return seconds;
+}
 function fetchDataTotalEmail(){
   
   $("#TotalAnsweredEmail").html(0);
@@ -197,6 +657,8 @@ function fetchDataTotalEmail(){
   $("#TotalQueEmail").html(0);
   $("#TotalAbnEmail").html(0);
   $("#TotalNotResponseEmail").html(0);
+    var lastvoip;
+  var lastomni;
 
 
   $.ajax({
@@ -218,20 +680,39 @@ function fetchDataTotalEmail(){
               $("#emailtotal").html(json[i].Jumlah);
             }else if(json[i].Jenis == "AnsweredEmail"){
               $("#emailanswer").html(json[i].Jumlah);
-            }else if(json[i].Jenis == "QueueEmail"){
+            }else if(json[i].Jenis == "NotResponseEmail" ){
               $("#emailwait").html(json[i].Jumlah);
             }else if(json[i].Jenis == "FRT"){
               $("#emailfrt").html(json[i].Jumlah);
+            }else if(json[i].Jenis == "EmailLastWaiting"){
+              $("#EmailLast").html(json[i].Jumlah);
+            }
+			else if(json[i].Jenis == "LastValueVoip"){
+				lastvoip =json[i].Jumlah;
+             // $("#lastvalueVoip").html(json[i].Jumlah);
+            }
+			else if(json[i].Jenis == "LastValueOmni"){
+				lastomni=json[i].Jumlah;
+             // $("#lastvalueOmni").html(json[i].Jumlah);
             }
              
+			 
 
         }
+		
+        var LasttotalSla = (parseFloat(lastvoip) +parseFloat(lastvoip))/2 ;
+        $("#lastvalueVoip").html(lastvoip +'%');
+        $("#lastvalueOmni").html(lastomni + '%');
+        $("#lastvalueAll").html(LasttotalSla + '%');
+      
+		
         var totalEmails = parseFloat($("#emailtotal").html());
         var answeredEmails = parseFloat($("#emailanswer").html());
         
-        var aht = (answeredEmails !== 0) ? (totalEmails / answeredEmails) * 100 : 0;
+        //var aht = (answeredEmails !== 0) ? (  answeredEmails/totalEmails) * 100 : 0;
+        //var igaht = (answeredEmails !== 0) ? (  answeredEmails/totalEmails) * 100 : 0;
         
-        $("#emailaht").html(aht);
+        //$("#emailaht").html(aht);
         
 
       },
@@ -268,45 +749,55 @@ function fetchDataKelola(){
           for (i = 0; i < json.length; i++) {
 
           
-            //LC
-            if(json[i].label == "Total" && json[i].type =='Lc'){
-              $("#lctotal").html(json[i].Jumlah);
-            }else if(json[i].label == "Reply" && json[i].type =='Lc'){
-              $("#lcreply").html(json[i].Jumlah);
-            }else if(json[i].label == "queue" && json[i].type =='Lc'){
-              $("#lcwait").html(json[i].Jumlah);
-            }
-            //fb
-            if(json[i].label == "Total" && json[i].type =='Fb'){
-              $("#fbtotal").html(json[i].Jumlah );
-            }else if(json[i].label == "Reply" && json[i].type =='Fb'){
-              $("#fbreply").html(json[i].Jumlah);
-            }else if(json[i].label == "queue" && json[i].type =='Fb'){
-              $("#fbwait").html(json[i].Jumlah);
-            }
             //Ig
-           
             if(json[i].label == "Total" && json[i].type =='Ig'){
               $("#igtotal").html(json[i].Jumlah );
-            }else if(json[i].label == "Reply" ){
+            }else if(json[i].label == "Reply" &&  json[i].type =='Ig'){
               $("#igreply").html(json[i].Jumlah);
             }else if(json[i].label == "queue" && json[i].type =='Ig'){
               $("#igwait").html(json[i].Jumlah);
+            }else if(json[i].label == "close" && json[i].type =='Ig'){
+              $("#igend").html(json[i].Jumlah);
+            }else if(json[i].label == "last" && json[i].type =='Ig'){
+              $("#IgLast").html(json[i].Jumlah);
             }
-            //Ig
-           
-            if(json[i].label == "Total" && json[i].Jenis =='Wa'){
+
+            //wa
+            if(json[i].label == "Total" && json[i].type =='Wa'){
               $("#watotal").html(json[i].Jumlah );
             }else if(json[i].label == "Reply" && json[i].type =='Wa'){
               $("#wareply").html(json[i].Jumlah );
             }else if(json[i].label == "queue" && json[i].type =='Wa'){
               $("#wawait").html(json[i].Jumlah);
+            }else if(json[i].label == "close" && json[i].type =='Wa'){
+              $("#waend").html(json[i].Jumlah);
+            }else if(json[i].label == "last" && json[i].type =='Wa'){
+              $("#WaLast").html(json[i].Jumlah);
             }
-            
-             
-
         }
-        
+		
+		 
+		  var igTotal = (parseFloat($("#igend").html()) / parseFloat($("#igtotal").html())) * 100;
+		
+		   var waTotal = (parseFloat($("#waend").html()) / parseFloat($("#watotal").html())) * 100;
+		      var emailTotal = (parseFloat($("#emailanswer").html()) / parseFloat($("#emailtotal").html())) * 100;
+	
+		 
+       	  	$("#igaht").html(isNaN(igTotal)?RoundingAngka(100):RoundingAngka(igTotal));
+			$("#waaht").html(isNaN(waTotal)?RoundingAngka(100):RoundingAngka(waTotal));
+			$("#emailaht").html(isNaN(emailTotal)?RoundingAngka(100):RoundingAngka(emailTotal));
+			  var waTotal1 = isNaN(waTotal) ? RoundingAngka(100) :RoundingAngka(waTotal);
+			   var igTotal1 = isNaN(igTotal)? RoundingAngka(100) :RoundingAngka(igTotal);
+			    var emailTotal1 = isNaN(emailTotal) ? RoundingAngka(100) :RoundingAngka(emailTotal);
+			 
+			
+			var TotalOmni = ( parseFloat(waTotal1)+ parseFloat(igTotal1) +parseFloat(emailTotal1) )/3;
+			
+			$('#valueOmni').html(RoundingAngka(TotalOmni));
+			//$('#valueVoip').html
+			
+			var all =parseFloat($("#valueVoip").html())+ TotalOmni;
+			$('#valueAll').html(RoundingAngka(all/2));
         
 
       },
@@ -317,6 +808,19 @@ function fetchDataKelola(){
       }
   })
 }
+function RoundingAngka(angka) {
+   
+   // Kalikan dengan 100, lalu bulatkan, kemudian bagi dengan 100
+    var hasil = (Math.round(angka * 100) / 100).toFixed(2);
+    // Ubah hasil menjadi string
+    var hasilString = hasil.toString();
+    // Periksa jika hasil terakhir adalah 00, maka hapus
+    if (hasilString.endsWith('.00')) {
+        return hasilString.substring(0, hasilString.length - 3)+"%";
+    }
+    return hasilString +"%";
+}
+
 
 
 function storeUserData(fieldName,userData) {
@@ -511,9 +1015,55 @@ function blink(selector){
 
 function agentList() {
     getDateTime();
+	 SLA();
+  GetSShData();
+  fetchDataAgent();
+  fetchDataTotalEmail();
+  fetchDataKelola();
+  fetchDataFRTAndAHT();
+  fetchDataTotalAux();
+   
    
 }
 
+function fetchDataFRTAndAHT(){
+
+    $.ajax({
+      type: "POST",
+      url:urlUidesk,
+      data: "{TrxID:'', TrxUserName: '', TrxAction: 'UIDESK203'}",
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      success: function (data) {
+
+          var json = JSON.parse(data.d);
+          var i, x, resultSourceEnquiryReason = "";
+          console.log(json);
+          for (i = 0; i < json.length; i++) {
+            // $("#emailaht").html(json[i].AHTEmail);
+			  $("#emailfrt").html(json[i].FRTEmail);
+			  $("#fbfrt").html(json[i].FRTFb);
+			   //$("#fbaht").html(json[i].AHTFb);
+			   $("#igfrt").html(json[i].FRTIg);
+			   //$("#igaht").html(json[i].AHTIg);
+			   $("#wafrt").html(json[i].FRTWa);
+			   //$("#waaht").html(json[i].AHTWa);
+			   $("#lcfrt").html(json[i].FRTLc);
+			   //$("#lcaht").html(json[i].AHTLc);
+			    
+          
+            
+
+          }
+
+      },
+      error: function (xmlHttpRequest, textStatus, errorThrown) {
+          console.log(xmlHttpRequest.responseText);
+          console.log(textStatus);
+          console.log(errorThrown);
+      }
+  })
+}
 function getDateTime() {
   var today = new Date();
   let hours = today.getHours(); // get hours

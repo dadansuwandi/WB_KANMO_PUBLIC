@@ -3,8 +3,8 @@
   ini_set('display_errors', 0);
   ini_set('display_startup_errors', 0);
    
-  $key ="Uid35k32!";
-  $ssh1 = new Net_SSH2('pbx.pelni.uidesk.id');   
+  $key ="Uid35k32!J4y4J4y4";
+  $ssh1 = new Net_SSH2('pbx.pelni.uidesk.id',3389);   
   if (!$ssh1->login('root', $key))   exit('Login Failed'); 
   
   $numbers1 = array(10010);
@@ -41,7 +41,7 @@
       
   
       $outputArray['DataDetail'][] = array(
-          'ACD-IN' => $in_call_count,
+          'ACD_IN' => $in_call_count,
           'QUE' => $in_callwait_count,
           'READY' => $in_ready_count,
           'UNAVAILABLE' => $in_unavailable_count
